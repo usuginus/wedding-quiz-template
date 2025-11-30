@@ -1,78 +1,82 @@
-# wedding-quiz-template
+# Wedding Quiz Template
 
-GitHub Pages で公開できる結婚式用クイズサイトです。
-テーブルに置いた QR コードからアクセスし、クイズに回答する想定です。
-代表者名とスコアを Google Apps Script 経由でスプレッドシートに保存できるので、景品用の集計も簡単です。
+<p align="center">
+  <img src="./img/logo.png" alt="Wedding quiz banner" width="312">
+</p>
 
-## デモ・確認できること
+Minimal vanilla‑JS template for running a “table quiz” during a wedding reception. Guests scan a QR code, answer curated questions, and optionally push their scores to Google Sheets through Apps Script. Everything is static and deployable to GitHub Pages.
 
-https://usuginus.github.io/wedding-quiz-template/
+## Demo
 
-- Hero/説明文・入力フォーム・クイズ画面・結果画面までの一連の流れ
-- 代表者名入力 → クイズ開始 → 解説つき回答 → 結果ページの表示と回答振り返り
-- スマートフォン・PC それぞれでのレスポンシブ表示
+- https://usuginus.github.io/wedding-quiz-template/
+- Shows the full flow: landing → player name entry → quiz UI → explanations → results + answer recap
 
-## 推奨する使い方
+## Why this project?
 
-1. GitHub でこのリポジトリを **Fork** します（Fork することで、オリジナルの更新を取り込みつつ自分専用の調整ができます）。
-2. Fork したリポジトリをローカルへクローンし、`js/custom-content.js` や `styles.css` を編集してオリジナルのコンテンツに置き換えます。
-3. `apps-script.js` を Apps Script にデプロイし、`window.WeddingSettings.APPS_SCRIPT_ENDPOINT` を更新します。
-4. GitHub Pages で公開し、生成された URL を QR コード化して会場に設置してください。
+- **Zero backend**: just `index.html` + a tiny Apps Script endpoint.
+- **Easy theming**: copy/text/questions live in a single file (`js/custom-content.js`).
+- **Mobile friendly**: tuned for guests holding a phone in one hand and a drink in the other.
+- **Fork‑first workflow**: clone once, tweak content per couple, redeploy.
 
-## ディレクトリ構成
+## Architecture
 
 ```
-.
-├── index.html            # メインページ
-├── styles.css            # スタイル
+├── index.html            # Root layout + script tags (no build step)
+├── styles.css            # Global styles, gradients, responsive tweaks
 ├── js/
-│   ├── app.js            # 画面制御ロジック
-│   ├── services.js       # Apps Script 送信など外部連携
-│   ├── custom-content.js # 利用者が編集する文言・問題データ
-│   └── config.js         # Apps Script など環境設定
-├── img/                  # 解説用の画像
-├── apps-script.js        # Google Apps Script 用のサンプルコード
-└── README.md
+│   ├── app.js            # Quiz controller (state machine + DOM rendering)
+│   ├── services.js       # Google Apps Script submission w/ retry
+│   ├── config.js         # Merges defaults with user-provided copy/settings
+│   └── custom-content.js # You edit this: copy, questions, settings
+├── img/                  # Explanatory images for question details
+├── apps-script.js        # Drop-in Apps Script handler (GET/POST/OPTIONS)
+└── README.md             # This doc
 ```
 
-## コンテンツのカスタマイズ
+## Quick start
 
-1. **文言・設定を整える**  
-   `js/custom-content.js` の `window.WeddingCopy` に hero 文言、ボタン、結果メッセージなどすべてのテキストがまとまっています。必要なブロックだけ置き換えてください。
-2. **クイズを差し替える**  
-   同ファイルの `window.WeddingQuestions` がクイズデータです。1 問につき `text`, `choices`, `correctIndex`, `detail`, `detailImage` を編集すれば OK。不要なプロパティは削除してもかまいません。
-3. **動作設定を変更する**  
-   `window.WeddingSettings` に Apps Script の URL (`APPS_SCRIPT_ENDPOINT` など) を記入します。複数会場で使う場合はここを書き換えるだけで送信先を切り替えられます。
-4. **デザインを調整する**  
-   カラーやフォント、背景などのスタイルは `styles.css` で管理しています。必要に応じてメディアクエリも追記してください。
-5. **画像を差し替える**  
-   解説用画像は `img/` 配下に置き、各問題の `detailImage.src` から参照します。
+1. **Fork this repo** – recommended so you can keep the upstream template up to date.
+2. `git clone <your-fork>` and open the folder in your editor.
+3. Double-click `index.html` or run any static server (`npx serve` etc.) to preview locally.
+4. Edit `js/custom-content.js` to replace copy/questions/settings (see below).
+5. Deploy your fork to GitHub Pages (`Settings → Pages → main branch / root`).
 
-## Google Apps Script でスコア保存
+## Customizing content
 
-1. **スプレッドシートを準備**  
-   Google スプレッドシートを作成（例: `Scores` シート）。
-2. **Apps Script を作成**  
-   「拡張機能 > Apps Script」で `apps-script.js` の内容を貼り付け、`<YOUR_SPREADSHEET_ID>` を差し替えます。`doGet`/`doPost`/`doOptions` は CORS 対応済みです。
-3. **ウェブアプリとしてデプロイ**  
-   「デプロイ > 新しいデプロイ > ウェブアプリ」で `doPost` を実行関数に、アクセス権を「全員（匿名）」に設定して公開します。
-4. **URL を設定**  
-   デプロイ後に表示される URL を `js/custom-content.js` の `window.WeddingSettings.APPS_SCRIPT_ENDPOINT` に貼り付けます（あるいは `window.GOOGLE_APPS_SCRIPT_ENDPOINT` で上書きも可能です）。
-5. **送信を確認**  
-   クイズを最後まで回答すると、代表者名・正解数・開始/完了時刻などがスプレッドシートへ追記されます。
+Everything a couple-specific deployment needs lives in `js/custom-content.js`.
 
-## GitHub Pages で公開
+| Section                   | Description                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------- |
+| `window.WeddingCopy`      | Landing hero text, intro steps, button labels, result messages, etc.                        |
+| `window.WeddingQuestions` | Array of quiz items (`text`, `choices`, `correctIndex`, optional `detail` + `detailImage`). |
+| `window.WeddingSettings`  | Runtime knobs such as `APPS_SCRIPT_ENDPOINT`.                                               |
 
-1. GitHub に本リポジトリをプッシュします。
-2. リポジトリ設定の「Pages」でブランチ（例: `main`）とルートを選択し、公開を有効化します。
-3. 表示された URL をスキャン用 QR コードに変換し、会場のテーブルへ設置してください。
+Styling tweaks go into `styles.css` (fonts, gradients, spacing). Images referenced in `detailImage.src` should be dropped in `img/`.
 
-## 補足
+## Persisting scores with Google Apps Script
 
-- Apps Script の URL を設定しない場合、スコア送信は自動的にスキップされます。
-- 大人数でアクセスする場合は、Google スプレッドシートのアクセス権と Apps Script の実行権限を事前に確認してください。
-- 景品用のランキングは、スプレッドシートのフィルターや条件付き書式を活用すると便利です。
+1. Create a Google Sheet (e.g. `Scores`) and note the spreadsheet ID.
+2. From the sheet, open **Extensions → Apps Script** and paste `apps-script.js`.
+3. Replace `<YOUR_SPREADSHEET_ID>` with your actual ID.
+4. Deploy as a **Web App**:
+   - Execute as: _Me_
+   - Who has access: _Anyone_
+5. Copy the resulting URL and set `window.WeddingSettings.APPS_SCRIPT_ENDPOINT` in `js/custom-content.js`.
+6. Optional: for staging, you can override at runtime via `window.GOOGLE_APPS_SCRIPT_ENDPOINT`.
 
-## ライセンス
+The client sends JSON via `fetch(..., { mode: 'no-cors' })` and retries with exponential backoff. If you skip the Apps Script URL, score submission is silently disabled.
 
-このテンプレートは [MIT License](./LICENSE) のもとで公開しています。ご了承のうえご利用ください。
+## Deploying to guests
+
+1. Push to your fork’s `main`.
+2. Enable GitHub Pages on `main / root`.
+3. Convert the published URL into a QR code (there are countless free generators).
+4. Print the QR code on table tents. Guests scan, pick a representative name, and play.
+
+## Contributing
+
+Bug reports and PRs are welcome—especially around accessibility or translation improvements.
+
+## License
+
+[MIT](./LICENSE) © 2024 – use freely, just keep the notice. Forking is encouraged for each couple’s custom build.
