@@ -4,11 +4,20 @@ GitHub Pages で公開できる結婚式用クイズサイトです。
 テーブルに置いた QR コードからアクセスし、クイズに回答する想定です。
 代表者名とスコアを Google Apps Script 経由でスプレッドシートに保存できるので、景品用の集計も簡単です。
 
-## 動作確認
+## デモ・確認できること
 
-1. リポジトリをクローンまたはダウンロードします。
-2. `index.html` をブラウザで開きます。
-3. 代表者名を入力して「クイズを始める」を押し、全問回答して結果表示を確認してください。
+https://usuginus.github.io/wedding-quiz-template/
+
+- Hero/説明文・入力フォーム・クイズ画面・結果画面までの一連の流れ
+- 代表者名入力 → クイズ開始 → 解説つき回答 → 結果ページの表示と回答振り返り
+- スマートフォン・PC それぞれでのレスポンシブ表示
+
+## 推奨する使い方
+
+1. GitHub でこのリポジトリを **Fork** します（Fork することで、オリジナルの更新を取り込みつつ自分専用の調整ができます）。
+2. Fork したリポジトリをローカルへクローンし、`js/custom-content.js` や `styles.css` を編集してオリジナルのコンテンツに置き換えます。
+3. `apps-script.js` を Apps Script にデプロイし、`window.WeddingSettings.APPS_SCRIPT_ENDPOINT` を更新します。
+4. GitHub Pages で公開し、生成された URL を QR コード化して会場に設置してください。
 
 ## ディレクトリ構成
 
@@ -28,26 +37,29 @@ GitHub Pages で公開できる結婚式用クイズサイトです。
 
 ## コンテンツのカスタマイズ
 
-- **テキスト・問題データ**: `js/custom-content.js` を編集します。
-  - `window.WeddingCopy` … 画面の文言（`hero / intro / playerForm / buttons / quiz / result / messages` など）をまとめています。
-  - `window.WeddingQuestions` … クイズの内容。`text`, `choices`, `correctIndex`, `detail`, `detailImage` を必要に応じて変更してください。
-  - `window.WeddingSettings` … `APPS_SCRIPT_ENDPOINT` など動作設定を記述します。Apps Script の Web アプリ URL はここを書き換えてください。
-- **装飾**: `styles.css` を調整します。フォントやカラー、背景などを変更可能です。
-- **画像**: 解説用の画像は `img/` 配下に配置し、`detailImage.src` で参照してください。
+1. **文言・設定を整える**  
+   `js/custom-content.js` の `window.WeddingCopy` に hero 文言、ボタン、結果メッセージなどすべてのテキストがまとまっています。必要なブロックだけ置き換えてください。
+2. **クイズを差し替える**  
+   同ファイルの `window.WeddingQuestions` がクイズデータです。1 問につき `text`, `choices`, `correctIndex`, `detail`, `detailImage` を編集すれば OK。不要なプロパティは削除してもかまいません。
+3. **動作設定を変更する**  
+   `window.WeddingSettings` に Apps Script の URL (`APPS_SCRIPT_ENDPOINT` など) を記入します。複数会場で使う場合はここを書き換えるだけで送信先を切り替えられます。
+4. **デザインを調整する**  
+   カラーやフォント、背景などのスタイルは `styles.css` で管理しています。必要に応じてメディアクエリも追記してください。
+5. **画像を差し替える**  
+   解説用画像は `img/` 配下に置き、各問題の `detailImage.src` から参照します。
 
 ## Google Apps Script でスコア保存
 
-1. Google スプレッドシートを作成し、シート名（例: `Scores`）を決めます。
-2. スプレッドシートから「拡張機能 > Apps Script」を開き、リポジトリの `apps-script.js` を丸ごと貼り付けます。
-   - `const SHEET = ...` の `<YOUR_SPREADSHEET_ID>` を、ご自身のスプレッドシート ID に差し替えてください。
-   - `doGet`, `doPost`, `doOptions` すべてが CORS ヘッダーを返すため、`file://` や別ドメインからのアクセスでもブロックされません。
-3. デプロイ > 新しいデプロイ > ウェブアプリ を選び、以下を設定します。
-   - 実行するアプリ: `doPost`
-   - アクセスできるユーザー: `全員（匿名）`
-4. 表示された URL をコピーし、`js/config.js` の `CONFIGURED_ENDPOINT` を置き換えれば設定完了です（必要なら `window.GOOGLE_APPS_SCRIPT_ENDPOINT` で上書きも可能）。ブラウザで直接 `index.html` を開いても動作します。
-5. クイズを最後まで回答すると、代表者名・正解数・開始/完了時刻などがシートに追記されます。
-
-> ⚙️ **設定は簡単**: Apps Script の URL をメモして `js/config.js` の一行を差し替えるだけで、集計シートへの保存が有効になります。
+1. **スプレッドシートを準備**  
+   Google スプレッドシートを作成（例: `Scores` シート）。
+2. **Apps Script を作成**  
+   「拡張機能 > Apps Script」で `apps-script.js` の内容を貼り付け、`<YOUR_SPREADSHEET_ID>` を差し替えます。`doGet`/`doPost`/`doOptions` は CORS 対応済みです。
+3. **ウェブアプリとしてデプロイ**  
+   「デプロイ > 新しいデプロイ > ウェブアプリ」で `doPost` を実行関数に、アクセス権を「全員（匿名）」に設定して公開します。
+4. **URL を設定**  
+   デプロイ後に表示される URL を `js/custom-content.js` の `window.WeddingSettings.APPS_SCRIPT_ENDPOINT` に貼り付けます（あるいは `window.GOOGLE_APPS_SCRIPT_ENDPOINT` で上書きも可能です）。
+5. **送信を確認**  
+   クイズを最後まで回答すると、代表者名・正解数・開始/完了時刻などがスプレッドシートへ追記されます。
 
 ## GitHub Pages で公開
 
@@ -60,3 +72,7 @@ GitHub Pages で公開できる結婚式用クイズサイトです。
 - Apps Script の URL を設定しない場合、スコア送信は自動的にスキップされます。
 - 大人数でアクセスする場合は、Google スプレッドシートのアクセス権と Apps Script の実行権限を事前に確認してください。
 - 景品用のランキングは、スプレッドシートのフィルターや条件付き書式を活用すると便利です。
+
+## ライセンス
+
+このテンプレートは [MIT License](./LICENSE) のもとで公開しています。ご了承のうえご利用ください。
