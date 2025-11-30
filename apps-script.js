@@ -14,7 +14,6 @@ function doPost(e) {
     });
   }
 
-  // Parse JSON payload
   let data;
   try {
     data = JSON.parse(e.postData.contents);
@@ -22,11 +21,11 @@ function doPost(e) {
     return createJsonResponse({ status: "error", message: "invalid JSON" });
   }
 
-  // Acquire lock to prevent concurrent write conflicts
+  // Acquire script lock (to prevent concurrent writes)
   const lock = LockService.getScriptLock();
   try {
-    // Wait up to 10 seconds to obtain the lock
-    lock.waitLock(10 * 1000);
+    // Wait up to 90 seconds to obtain the lock
+    lock.waitLock(90 * 1000);
   } catch (err) {
     return createJsonResponse({
       status: "error",
@@ -41,7 +40,7 @@ function doPost(e) {
       throw new Error(`Sheet "${SHEET_NAME}" not found`);
     }
 
-    // Prepare one row of values (schema unchanged)
+    // Prepare one row of data (schema fixed)
     const row = [
       new Date(data.completedAt || new Date()),
       data.name || "",
@@ -52,9 +51,8 @@ function doPost(e) {
       data.isPerfect ? "TRUE" : "",
     ];
 
-    // Write using setValues() instead of appendRow() to reduce write-lock contention
-    const lastRow = sheet.getLastRow();
-    sheet.getRange(lastRow + 1, 1, 1, row.length).setValues([row]);
+    // Safely append a row (atomic operation with lock)
+    sheet.appendRow(row);
   } finally {
     // Always release the lock
     lock.releaseLock();
