@@ -1,7 +1,7 @@
 # Wedding Quiz Template
 
 <p align="center">
-  <img src="./img/logo.png" alt="Wedding quiz banner" width="312">
+  <img src="https://github.com/user-attachments/assets/7d5f8c55-fe32-4281-b603-869ce4bca494" alt="Wedding quiz banner">
 </p>
 
 Minimal vanilla‑JS template for running a “table quiz” during a wedding reception. Guests scan a QR code, answer curated questions, and optionally push their scores to Google Sheets through Apps Script. Everything is static and deployable to GitHub Pages.
