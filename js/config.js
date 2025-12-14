@@ -23,14 +23,16 @@
       start: "クイズを始める",
       submit: "回答",
       next: "次へ",
-      result: "結果を見る",
+      result: "回答を提出",
+      downloadResult: "結果を画像保存",
+      downloadResultSaving: "保存中...",
     },
     quiz: {
       placeholder: "ここに質問が表示されます",
       progressLabelTemplate: "Question {current} / {total}",
     },
     result: {
-      title: "Welcome！",
+      title: "Results",
       highlightLabel: "正解数",
       totalSeparator: " / ",
       message:
