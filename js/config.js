@@ -43,6 +43,10 @@
     },
   };
 
+  const DEFAULT_SETTINGS = {
+    showCorrectness: true,
+  };
+
   const userCopy = typeof window !== "undefined" ? window.WeddingCopy : null;
   const mergedCopy = mergeDeep(defaultCopy, userCopy || {});
   const resolvedCopy = mergedCopy;
@@ -50,6 +54,7 @@
     "https://script.google.com/macros/s/XXXXXXXXXXXXXXXXXXXXXXXX/exec";
   const userSettings =
     typeof window !== "undefined" ? window.WeddingSettings : null;
+  const mergedSettings = mergeDeep(DEFAULT_SETTINGS, userSettings || {});
 
   const endpointOverride =
     typeof window !== "undefined"
@@ -64,6 +69,7 @@
   const WeddingConfig = Object.freeze({
     copy: resolvedCopy,
     APPS_SCRIPT_ENDPOINT,
+    showCorrectness: mergedSettings.showCorrectness !== false,
   });
 
   if (typeof window !== "undefined") {

@@ -49,7 +49,7 @@ Everything a couple-specific deployment needs lives in `js/custom-content.js`.
 | ------------------------- | ------------------------------------------------------------------------------------------- |
 | `window.WeddingCopy`      | Landing hero text, intro steps, button labels, result messages, etc.                        |
 | `window.WeddingQuestions` | Array of quiz items (`text`, `choices`, `correctIndex`, optional `detail` + `detailImage`). |
-| `window.WeddingSettings`  | Runtime knobs such as `APPS_SCRIPT_ENDPOINT`.                                               |
+| `window.WeddingSettings`  | Runtime knobs such as `APPS_SCRIPT_ENDPOINT` and `showCorrectness` (set to `false` to hide per-question/result correctness cues). |
 
 Styling tweaks go into `styles.css` (fonts, gradients, spacing). Images referenced in `detailImage.src` should be dropped in `img/`.
 
