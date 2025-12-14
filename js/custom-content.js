@@ -94,5 +94,7 @@
   window.WeddingSettings = {
     APPS_SCRIPT_ENDPOINT:
       "https://script.google.com/macros/s/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec",
+    // Set to false to hide per-question correctness and the score breakdown on the result page
+    showCorrectness: true,
   };
 })();

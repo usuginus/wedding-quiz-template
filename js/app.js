@@ -4,6 +4,7 @@
     ? window.WeddingQuestions
     : [];
   const services = window.WeddingServices || {};
+  const showCorrectness = config.showCorrectness !== false;
   const copy = config.copy || {};
   const heroCopy = copy.hero || {};
   const introCopy = copy.intro || {};
@@ -64,6 +65,7 @@
     dom.resultTitle = $("#result-title");
     dom.resultHighlightLabel = $("#result-highlight-label");
     dom.resultTotalSeparator = $("#result-total-separator");
+    dom.resultHighlight = $(".result-highlight");
     dom.answerReview = $("#answer-review");
     dom.quizUnavailable = createQuizUnavailableNotice();
   }
@@ -209,11 +211,18 @@
 
     state.choiceButtons.forEach((button, idx) => {
       button.disabled = true;
-      button.classList.remove("choice--selected");
-      if (idx === currentQuestion.correctIndex) {
-        button.classList.add("choice--correct");
-      } else if (idx === state.selectedChoiceIndex) {
-        button.classList.add("choice--incorrect");
+      if (showCorrectness) {
+        button.classList.remove("choice--selected");
+        if (idx === currentQuestion.correctIndex) {
+          button.classList.add("choice--correct");
+        } else if (idx === state.selectedChoiceIndex) {
+          button.classList.add("choice--incorrect");
+        }
+      } else {
+        button.classList.toggle(
+          "choice--selected",
+          idx === state.selectedChoiceIndex
+        );
       }
     });
 
@@ -224,7 +233,12 @@
       isCorrect,
     });
 
-    renderQuestionDetail(currentQuestion);
+    if (showCorrectness) {
+      renderQuestionDetail(currentQuestion);
+    } else {
+      hide(dom.questionDetail);
+      dom.questionDetail.innerHTML = "";
+    }
     dom.submitBtn.disabled = true;
     dom.nextBtn.disabled = false;
   }
@@ -281,9 +295,6 @@
     hide(dom.quizCard);
     show(dom.resultCard);
 
-    dom.scoreOutput.textContent = String(totalQuestions);
-    dom.correctOutput.textContent = String(state.score);
-
     if (state.playerName) {
       dom.resultPlayer.textContent = `${resultCopy.playerPrefix || ""}${
         state.playerName
@@ -294,8 +305,19 @@
     }
 
     const isPerfect = state.score === totalQuestions;
-    dom.resultCard.classList.toggle("result-card--perfect", isPerfect);
-    dom.perfectMessage?.classList.toggle("hidden", !isPerfect);
+    dom.resultCard.classList.toggle(
+      "result-card--perfect",
+      isPerfect && showCorrectness
+    );
+    if (showCorrectness) {
+      dom.scoreOutput.textContent = String(totalQuestions);
+      dom.correctOutput.textContent = String(state.score);
+      dom.perfectMessage?.classList.toggle("hidden", !isPerfect);
+      show(dom.resultHighlight);
+    } else {
+      hide(dom.resultHighlight);
+      hide(dom.perfectMessage);
+    }
 
     dom.progressBar.style.width = "100%";
     dom.progressIndex.textContent = formatProgressLabel(
@@ -336,11 +358,13 @@
     state.history.forEach((entry, index) => {
       const item = document.createElement("li");
       item.className = "answer-review__item";
-      item.classList.add(
-        entry.isCorrect
-          ? "answer-review__item--correct"
-          : "answer-review__item--incorrect"
-      );
+      if (showCorrectness) {
+        item.classList.add(
+          entry.isCorrect
+            ? "answer-review__item--correct"
+            : "answer-review__item--incorrect"
+        );
+      }
 
       const questionText = document.createElement("p");
       questionText.className = "answer-review__question";
@@ -387,6 +411,10 @@
     dom.progressBar.style.width = "0%";
     dom.correctOutput.textContent = "0";
     dom.scoreOutput.textContent = String(totalQuestions);
+    if (!showCorrectness) {
+      hide(dom.resultHighlight);
+      hide(dom.perfectMessage);
+    }
     if (dom.answerReview) {
       dom.answerReview.innerHTML = "";
       dom.answerReview.classList.add("hidden");
