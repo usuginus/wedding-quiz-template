@@ -559,13 +559,28 @@
         scale: 2,
         backgroundColor: null,
       });
-      const dataUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.href = dataUrl;
-      link.download = "quiz-result.png";
-      link.click();
+      const blob = await canvasToBlob(canvas);
+      const fileName = "quiz-result.png";
+
+      if (canUseDownloadAttribute()) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      } else if (canShareFile(blob)) {
+        const file = new File([blob], fileName, { type: blob.type });
+        await navigator.share({ files: [file] });
+      } else {
+        const fallbackUrl = URL.createObjectURL(blob);
+        window.open(fallbackUrl, "_blank");
+        setTimeout(() => URL.revokeObjectURL(fallbackUrl), 4000);
+      }
     } catch (error) {
-      console.error("failed to save result image", error);
+      console.error("failed to download result", error);
     } finally {
       if (button) {
         button.disabled = false;
@@ -580,5 +595,33 @@
     const template =
       quizCopy.progressLabelTemplate || "Question {current} / {total}";
     return template.replace("{current}", current).replace("{total}", total);
+  }
+
+  function canvasToBlob(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error("Failed to convert canvas to blob"));
+          }
+        },
+        "image/png",
+        0.95
+      );
+    });
+  }
+
+  function canUseDownloadAttribute() {
+    return "download" in HTMLAnchorElement.prototype;
+  }
+
+  function canShareFile(blob) {
+    if (!navigator.canShare) {
+      return false;
+    }
+    const file = new File([blob], "result.png", { type: blob.type });
+    return navigator.canShare({ files: [file] });
   }
 })();
