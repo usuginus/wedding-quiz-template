@@ -45,7 +45,7 @@ function doPost(e) {
       new Date(data.completedAt || new Date()),
       data.name || "",
       data.startedAt || "",
-      data.isPerfect ? "TRUE" : "",
+      data.isPerfect ? "TRUE" : "FALSE",
       data.questionCount ?? "",
       data.score ?? "",
       data.percentage ?? "",
