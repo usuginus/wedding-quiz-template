@@ -67,6 +67,7 @@
     dom.resultTotalSeparator = $("#result-total-separator");
     dom.resultHighlight = $(".result-highlight");
     dom.answerReview = $("#answer-review");
+    dom.downloadBtn = $("#download-result-btn");
     dom.quizUnavailable = createQuizUnavailableNotice();
   }
 
@@ -76,6 +77,7 @@
     dom.startBtn?.addEventListener("click", handleStartQuiz);
     dom.submitBtn?.addEventListener("click", handleSubmit);
     dom.nextBtn?.addEventListener("click", handleNextQuestion);
+    dom.downloadBtn?.addEventListener("click", handleDownloadResult);
   }
 
   function handlePlayerFormSubmit(event) {
@@ -409,6 +411,7 @@
     assignText(dom.startBtn, buttonCopy.start);
     assignText(dom.submitBtn, buttonCopy.submit);
     assignText(dom.nextBtn, buttonCopy.next);
+    assignText(dom.downloadBtn, buttonCopy.downloadResult);
     assignText(dom.resultTitle, resultCopy.title);
     assignText(dom.resultHighlightLabel, resultCopy.highlightLabel);
     assignText(dom.resultTotalSeparator, resultCopy.totalSeparator);
@@ -533,6 +536,42 @@
         );
       } else {
         dom.introCard.removeAttribute("aria-labelledby");
+      }
+    }
+  }
+
+  async function handleDownloadResult() {
+    if (!dom.resultCard || !window.html2canvas) {
+      console.warn("html2canvas is not available; cannot download result.");
+      return;
+    }
+
+    const savingLabel = buttonCopy.downloadResultSaving || "saving...";
+    const button = dom.downloadBtn;
+    const previousText = button ? button.textContent : null;
+    if (button) {
+      button.disabled = true;
+      button.textContent = savingLabel;
+    }
+
+    try {
+      const canvas = await window.html2canvas(dom.resultCard, {
+        scale: 2,
+        backgroundColor: null,
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = "quiz-result.png";
+      link.click();
+    } catch (error) {
+      console.error("failed to save result image", error);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        if (previousText !== null) {
+          button.textContent = previousText;
+        }
       }
     }
   }
