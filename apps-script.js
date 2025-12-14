@@ -44,11 +44,12 @@ function doPost(e) {
     const row = [
       new Date(data.completedAt || new Date()),
       data.name || "",
-      data.correct ?? "",
-      data.total ?? "",
-      data.percentage ?? "",
       data.startedAt || "",
       data.isPerfect ? "TRUE" : "",
+      data.questionCount ?? "",
+      data.score ?? "",
+      data.percentage ?? "",
+      data.answers ?? "",
     ];
 
     // Safely append a row (atomic operation with lock)

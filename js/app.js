@@ -328,10 +328,18 @@
     renderAnswerReview();
 
     if (typeof services.submitScoreToAppsScript === "function") {
+      const answers = state.history
+        .map((entry) =>
+          entry.selectedIndex === null || entry.selectedIndex === undefined
+            ? ""
+            : String(entry.selectedIndex)
+        )
+        .join(",");
       services.submitScoreToAppsScript({
         name: state.playerName,
-        correct: state.score,
-        total: totalQuestions,
+        score: state.score,
+        questionCount: totalQuestions,
+        answers,
         startedAt: state.quizStartedAt,
         completedAt: new Date(),
         isPerfect,

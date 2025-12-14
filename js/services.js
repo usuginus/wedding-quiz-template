@@ -7,8 +7,9 @@
 
   function submitScoreToAppsScript({
     name,
-    correct,
-    total,
+    score,
+    questionCount,
+    answers,
     startedAt,
     completedAt,
     isPerfect,
@@ -23,9 +24,15 @@
 
     const payload = {
       name,
-      correct,
-      total,
-      percentage: total ? Math.round((correct / total) * 100) : null,
+      score,
+      questionCount,
+      answers,
+      percentage:
+        typeof score === "number" &&
+        typeof questionCount === "number" &&
+        questionCount
+          ? Math.round((score / questionCount) * 100)
+          : null,
       startedAt: startedAt ? new Date(startedAt).toISOString() : null,
       completedAt: completedAt ? new Date(completedAt).toISOString() : null,
       isPerfect,
